@@ -23,7 +23,7 @@ def initiate_combat(player):
                 if enemy_health <= 0:
                     print("The goblin has fainted. You win!\n")
                     player.world_stats['gold'] += 5  # Reward
-                    player.gain_exp(5)  # Reward the player with experience, this checks for level up internally
+                    player.gain_exp(55)  # Reward the player with experience, this checks for level up internally
 
 
 

@@ -15,9 +15,7 @@ def main():
         if action == "e":
             combat.initiate_combat(player)
         elif action == "r":
-            player.world_stats['health'] = 100  # Restores health to full
-            player.world_stats['mana'] = 50     # Restores mana to full
-            print("You have rested and restored your health and mana.")
+            player.rest()  # Restores to full health and mana based on max values
         elif action == "c":
             player.display_world_stats()
             player.display_combat_stats()

@@ -1,3 +1,4 @@
+import math
 class Player:
     def __init__(self):
         self.name = "Unnamed Hero"
@@ -41,6 +42,14 @@ class Player:
             'Shields': [],
             'Misc': []
         }
+        self.base_hp_formula_a = 322.22
+        self.base_hp_formula_c = 222.22
+        # Assume similar formula variables for mana or adjust as needed
+        self.base_mana_formula_a = 100  # Example value
+        self.base_mana_formula_c = 20   # Example value
+        # Initialize max_health and max_mana
+        self.max_health = self.calculate_max_health()
+        self.max_mana = self.calculate_max_mana()
 
     def display_world_stats(self):
         print("\nCharacter Status:")
@@ -82,6 +91,25 @@ class Player:
 
         # After updating, show the updated stats
         self.display_combat_stats()
+
+    def calculate_max_health(self):
+        """Calculate the max HP using the player's level and the given formula."""
+        return math.ceil((self.base_hp_formula_a * (self.world_stats['level'] ** 0.5) - self.base_hp_formula_c) / 10) * 10
+
+    def calculate_max_mana(self):
+        """Calculate the max Mana using the player's level and a formula."""
+        return 50 + (self.world_stats['level']-1)*12
+    def update_health(self):
+        """Update the player's health to the new maximum."""
+        self.max_health = self.calculate_max_health()
+        self.world_stats['health'] = self.max_health
+
+    def update_mana(self):
+        """Update the player's mana to the new maximum."""
+        self.max_mana = self.calculate_max_mana()
+        self.world_stats['mana'] = self.max_mana
+    
+
     def gain_exp(self, amount):
         """Handles the player gaining experience and leveling up if enough exp is gained."""
         self.exp += amount
@@ -92,6 +120,15 @@ class Player:
 
         if self.exp >= level_up_threshold:
             self.world_stats['level'] += 1  # Increment the player's level
-            self.exp = 0  # Reset experience points after leveling up
-            print(f"You have leveled up to level {self.world_stats['level']}!\n")
+            self.exp -= level_up_threshold  # Subtract the threshold from exp
+            self.update_health()  # Update the player's health with the new level
+            self.update_mana()  # Update the player's mana with the new level
+
+            print(f"You have leveled up to level {self.world_stats['level']}!")
             self.level_up_stat()  # Prompt the player to level up a stat
+
+    def rest(self):
+        """Restores the player's health and mana to their maximum values."""
+        self.world_stats['health'] = self.max_health
+        self.world_stats['mana'] = self.max_mana
+        print(f"You have rested and restored your health to {self.max_health} and mana to {self.max_mana}.")
