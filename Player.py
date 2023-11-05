@@ -1,4 +1,5 @@
 import math
+import random
 class Player:
     def __init__(self):
         self.name = "Unnamed Hero"
@@ -42,8 +43,6 @@ class Player:
             'Shields': [],
             'Misc': []
         }
-        self.base_hp_formula_a = 322.22
-        self.base_hp_formula_c = 222.22
         # Assume similar formula variables for mana or adjust as needed
         self.base_mana_formula_a = 100  # Example value
         self.base_mana_formula_c = 20   # Example value
@@ -94,11 +93,16 @@ class Player:
 
     def calculate_max_health(self):
         """Calculate the max HP using the player's level and the given formula."""
-        return math.ceil((self.base_hp_formula_a * (self.world_stats['level'] ** 0.5) - self.base_hp_formula_c) / 10) * 10
+        endurance_bonus = self.combat_stats['Endurance'] / 200 * 2
+        a = 322.22
+        c = 222.22
+        max_hp = (a * (self.world_stats['level'] ** 0.5) - c) * (1 + endurance_bonus)
+        return math.ceil(max_hp / 10) * 10  # Round up to nearest 10
 
     def calculate_max_mana(self):
         """Calculate the max Mana using the player's level and a formula."""
-        return 50 + (self.world_stats['level']-1)*12
+        return 50 + (self.world_stats['level']-1)*12 + (self.combat_stats['Intellect'] / 200 * 2)
+    
     def update_health(self):
         """Update the player's health to the new maximum."""
         self.max_health = self.calculate_max_health()
@@ -132,3 +136,32 @@ class Player:
         self.world_stats['health'] = self.max_health
         self.world_stats['mana'] = self.max_mana
         print(f"You have rested and restored your health to {self.max_health} and mana to {self.max_mana}.")
+
+    def calculate_damage(self,base_damage,is_magic=False):
+        """
+        Calculate the damage done by the player, factoring in strength and intellect for
+        physical and magic attacks respectively, and luck for critical hits.
+        """
+
+        #Calculate Critical hit change
+        crit_chance = self.combat_stats['Luck'] / 200 * 5
+        if random.random() < crit_chance / 100:
+            crit_multiplier = random.uniform(1.5, 2.0)
+            print("It's a critical hit!")
+        else:
+            crit_multiplier = 1
+        
+        #Scaling attacks with STR or INT
+        if is_magic:
+            damage_bonus = self.combat_stats['Intellect'] / 200 * 2
+            damage = (base_damage * (1 + damage_bonus)) * crit_multiplier
+        else:
+            damage_bonus = self.combat_stats['Strength'] / 200 * 2
+            damage = (base_damage * (1 + damage_bonus)) * crit_multiplier
+
+        return math.ceil(damage)
+    
+    def calculate_dodge_chance(self):
+        """Calculate the player's chance to dodge an attack."""
+        dodge_chance = 1 + self.combat_stats['Stealth'] / 200 * 9
+        return dodge_chance
